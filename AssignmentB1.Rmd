@@ -1,0 +1,78 @@
+---
+title: "AssignmentB1"
+author: "Suhaila Ng"
+date: "2026-11-02"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup
+I started with making sure that my environment is empty to ensure that my function doesn't depend on any objects I created earlier. No packages need to be loaded for my function because it only uses base R. 
+
+```{r clean-environment}
+rm(list = ls())
+```
+
+# Exercise 1: Make a Function
+I wanted to make a function that would help during research involving potted plants and treatments. My goal was for the function to assign treatments to pots at random so that external factors like bench position, light, or watering order do not line up with a particular treatment and cause confounding results. Doing this by hand (or copying and pasting `sample()`code for every experiment) is time consuming and can lead to errors. So, this function builds a randomized treatment layout for any number of treatments and pots. The function is balanced as a default (each treatment is used as evenly as possible), which is the usual goal in an experiment, but it can also assign treatments fully at random. This function could also be used to assign treatments to pretty much anything, not just pots. For example, if they're field sites receiving treatment, that works too. The roxygen2 documentation sits directly above the function in the same code chunk.
+
+```{r randomize-treatments}
+#' Title: Randomizing Pot Treatments 
+#' Function description: Randomly assigns one treatment to each pot, using each as 
+#' possible. If the pots can't be split equally, the extra pots go to
+#' randomly chosen treatments.
+#' 
+#' @param n_treatments Number of treatments (a single positive whole number).
+#'   Named `n_treatments` because it is a count of treatments.
+#' @param n_pots Total number of pots (a single positive whole number, at least
+#'   `n_treatments`). Named `n_pots` to match `n_treatments`, and because pots
+#'   are the experimental unit that receives a treatment in my study.
+#' @param treatment_labels Optional character vector of treatment names, one per
+#'   treatment. The default will be  "T1", "T2", etc. Named `treatment_labels`
+#'   because these are the labels that appear in the output, not numeric counts.
+#' @param seed Optional single number. If supplied, `set.seed(seed)` is called
+#'   so the layout can be reproduced. Named `seed` because it is passed
+#'   straight to `set.seed()`.
+#'
+#' @return A data frame with one row per pot and two columns: `pot_id`
+#'   (integer, 1 to `n_pots`) and `treatment` (factor, with levels in the order
+#'   of `treatment_labels`).
+randomize_treatments <- function(n_treatments,
+                                 n_pots,
+                                 treatment_labels = NULL,
+                                 seed = NULL) {
+  if (n_pots < n_treatments) {
+    stop("`n_pots` must be at least `n_treatments`.", call. = FALSE)
+  }
+
+  if (is.null(treatment_labels)) {
+    treatment_labels <- paste0("T", seq_len(n_treatments))
+  }
+  if (length(treatment_labels) != n_treatments) {
+    stop("`treatment_labels` must have one label per treatment.", call. = FALSE)
+  }
+
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+
+  # Shuffle the labels (so extras go to random treatments), repeat them to
+  # fill every pot, then shuffle again to randomize the pot order
+  assigned <- sample(rep_len(sample(treatment_labels), n_pots))
+
+  data.frame(
+    pot_id    = seq_len(n_pots),
+    treatment = factor(assigned, levels = treatment_labels)
+  )
+}
+
+```
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
