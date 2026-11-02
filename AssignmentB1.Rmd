@@ -41,6 +41,7 @@ I wanted to make a function that would help during research involving potted pla
 #' @return A data frame with one row per pot and two columns: `pot_id`
 #'   (integer, 1 to `n_pots`) and `treatment` (factor, with levels in the order
 #'   of `treatment_labels`).
+#'   
 randomize_treatments <- function(n_treatments,
                                  n_pots,
                                  treatment_labels = NULL,
