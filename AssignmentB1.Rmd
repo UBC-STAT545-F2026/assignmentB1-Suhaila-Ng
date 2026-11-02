@@ -10,14 +10,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Setup
-I started with making sure that my environment is empty to ensure that my function doesn't depend on any objects I created earlier. No packages need to be loaded for my function because it only uses base R. However, to test it, you do need to load the 'testthat' package'.
+I started with making sure that my environment is empty to ensure that my function doesn't depend on any objects I created earlier. No packages need to be loaded for my function because it only uses base R. However, to test it, you do need to load the 'testthat' package.
 
 ```{r clean-environment}
 rm(list = ls())
 ```
 
 # Exercise 1 and 2: Make and Document a Function
-I wanted to make a function that would help during research involving potted plants and treatments. My goal was for the function to assign treatments to pots at random so that external factors like bench position, light, or watering order do not line up with a particular treatment and cause confounding results. Doing this by hand (or copying and pasting `sample()`code for every experiment) is time consuming and can lead to errors. So, this function builds a randomized treatment layout for any number of treatments and pots. The function is balanced as a default (each treatment is used as evenly as possible), which is the usual goal in an experiment, but it can also assign treatments fully at random. This function could also be used to assign treatments to pretty much anything, not just pots. For example, if they're field sites receiving treatment, that works too. (Btw the roxygen2 documentation sits directly above the function in the same code chunk.)
+I wanted to make a function that would help during research involving potted plants and treatments. My goal was for the function to assign treatments to pots at random so that external factors like bench position, light, or watering order do not line up with a particular treatment and cause confounding results. Doing this by hand (or copying and pasting sample() code for every experiment) is time consuming and can lead to errors. So, this function builds a randomized treatment layout for any number of treatments and pots. The layout is always balanced (each treatment is used as evenly as possible), which is the usual goal in an experiment. This function could also be used to assign treatments to pretty much anything, not just pots. For example, if they’re field sites receiving treatment, that works too.
 
 ```{r randomize-treatments}
 #' Title: Randomizing Pot Treatments 
@@ -95,16 +95,14 @@ named_layout
 table(named_layout$treatment)
 ```
 
-And lastly,the code below is deliberately showing an error when there are fewer pots than treatments.
+And lastly, the code below is deliberately showing an error when there are fewer pots than treatments.
 
 ```{r example-error, error = TRUE}
 randomize_treatments(n_treatments = 5, n_pots = 3)
 ```
 
-```
-
 # Exercise 4: Test the Function
-In order to make sure that the function behaves as I intended, I wrote formal tests with the `testthat` package. Each test covers a different kind of input, so none of them repeat each other. The three inputs I am testing are a normal input, the balance of the treatments, and an invalid input. I also added a test to make sure that the seed argument givves the same layout. 
+In order to make sure that the function behaves as I intended, I wrote formal tests with the `testthat` package. Each test covers a different kind of input, so none of them repeat each other. The three inputs I am testing are a normal input, the balance of the treatments, and an invalid input. I also added a test to make sure that the seed argument gives the same layout. 
 
 ```{r test-function}
 library(testthat)
