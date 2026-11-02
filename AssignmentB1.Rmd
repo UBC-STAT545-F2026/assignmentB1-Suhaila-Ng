@@ -10,21 +10,22 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Setup
-I started with making sure that my environment is empty to ensure that my function doesn't depend on any objects I created earlier. No packages need to be loaded for my function because it only uses base R. 
+I started with making sure that my environment is empty to ensure that my function doesn't depend on any objects I created earlier. No packages need to be loaded for my function because it only uses base R. However, to test it, you do need to load the 'testthat' package'.
 
 ```{r clean-environment}
 rm(list = ls())
 ```
 
-# Exercise 1: Make a Function
-I wanted to make a function that would help during research involving potted plants and treatments. My goal was for the function to assign treatments to pots at random so that external factors like bench position, light, or watering order do not line up with a particular treatment and cause confounding results. Doing this by hand (or copying and pasting `sample()`code for every experiment) is time consuming and can lead to errors. So, this function builds a randomized treatment layout for any number of treatments and pots. The function is balanced as a default (each treatment is used as evenly as possible), which is the usual goal in an experiment, but it can also assign treatments fully at random. This function could also be used to assign treatments to pretty much anything, not just pots. For example, if they're field sites receiving treatment, that works too. The roxygen2 documentation sits directly above the function in the same code chunk.
+# Exercise 1 and 2: Make and Document a Function
+I wanted to make a function that would help during research involving potted plants and treatments. My goal was for the function to assign treatments to pots at random so that external factors like bench position, light, or watering order do not line up with a particular treatment and cause confounding results. Doing this by hand (or copying and pasting `sample()`code for every experiment) is time consuming and can lead to errors. So, this function builds a randomized treatment layout for any number of treatments and pots. The function is balanced as a default (each treatment is used as evenly as possible), which is the usual goal in an experiment, but it can also assign treatments fully at random. This function could also be used to assign treatments to pretty much anything, not just pots. For example, if they're field sites receiving treatment, that works too. (Btw the roxygen2 documentation sits directly above the function in the same code chunk.)
 
 ```{r randomize-treatments}
 #' Title: Randomizing Pot Treatments 
-#' Function description: Randomly assigns one treatment to each pot, using each as 
-#' possible. If the pots can't be split equally, the extra pots go to
+#'
+#' Randomly assigns one treatment to each pot, using each treatment as evenly
+#' as possible. If the pots can't be split equally, the extra pots go to
 #' randomly chosen treatments.
-#' 
+#'
 #' @param n_treatments Number of treatments (a single positive whole number).
 #'   Named `n_treatments` because it is a count of treatments.
 #' @param n_pots Total number of pots (a single positive whole number, at least
@@ -68,11 +69,64 @@ randomize_treatments <- function(n_treatments,
     treatment = factor(assigned, levels = treatment_labels)
   )
 }
+```
+
+# Exercise 3: Examples
+
+As a first, simple example, I will show 3 treatments and 10 pots. Since 10 doesn't divide evenly by 3, one treatment gets an extra pot. I set a `seed` so the layout is the same every time I knit this document.
+
+```{r example-default}
+layout <- randomize_treatments(n_treatments = 3, n_pots = 10, seed = 545)
+layout
+table(layout$treatment)
+```
+
+Next I am labelling the treatments using `treatment_labels`. The
+labels show up in the output, and the factor levels keep the order.
+
+```{r example-labels}
+named_layout <- randomize_treatments(
+  n_treatments = 3,
+  n_pots = 12,
+  treatment_labels = c("control", "low_N", "high_N"),
+  seed = 1
+)
+named_layout
+table(named_layout$treatment)
+```
+
+And lastly,the code below is deliberately showing an error when there are fewer pots than treatments.
+
+```{r example-error, error = TRUE}
+randomize_treatments(n_treatments = 5, n_pots = 3)
+```
 
 ```
 
+# Exercise 4: Test the Function
+In order to make sure that the function behaves as I intended, I wrote formal tests with the `testthat` package. Each test covers a different kind of input, so none of them repeat each other. The three inputs I am testing are a normal input, the balance of the treatments, and an invalid input. I also added a test to make sure that the seed argument givves the same layout. 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r test-function}
+library(testthat)
+
+test_that("a normal input gives one row per pot", {
+  out <- randomize_treatments(n_treatments = 3, n_pots = 10)
+  expect_equal(nrow(out), 10)
+})
+
+test_that("pots that divide evenly give each treatment the same number", {
+  out <- randomize_treatments(n_treatments = 3, n_pots = 12)
+  expect_equal(as.vector(table(out$treatment)), c(4, 4, 4))
+})
+
+test_that("fewer pots than treatments gives an error", {
+  expect_error(randomize_treatments(n_treatments = 5, n_pots = 3), "at least")
+  
+})
+test_that("the same seed gives the same layout", {
+  expect_identical(
+    randomize_treatments(n_treatments = 3, n_pots = 10, seed = 545),
+    randomize_treatments(n_treatments = 3, n_pots = 10, seed = 545)
+  )
+})
 ```
-
