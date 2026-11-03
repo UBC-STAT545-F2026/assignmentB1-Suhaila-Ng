@@ -11,7 +11,7 @@ This repository contains my submission for Assignment B1 in STAT 545B. It shows 
 - assignmentB1-Suhaila-Ng.Rproj: the RStudio project file. 
 
 
-AI Disclosure:
+#### AI Disclosure:
 
 I asked Claude.AI how to prevent .Rmd from showing a new layout each time you knit and it introduced the concept of the "seed" argument to me.
 I also asked it to look over my code for any typos/errors and it caught 3. 
